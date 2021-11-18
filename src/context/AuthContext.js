@@ -1,4 +1,5 @@
-import { createContext, useReducer } from "react";
+import { createContext, useReducer, useEffect } from "react";
+import { projectAuth } from '../firebase/config'
 
 export const AuthContext = createContext()
 
@@ -8,6 +9,8 @@ export const authReducer = (state, action) => {
             return { ...state, user: action.payload }
         case 'LOGOUT':
             return { ...state, user: null }
+        case 'AUTH_IS_READY':
+            return {...state, user: action.payload, authIsReady: true}
         default:
             return state
     }
@@ -18,8 +21,23 @@ export const authReducer = (state, action) => {
 export const AuthContextProvider = ({children}) => {
 
     const [state, dispatch] = useReducer(authReducer, {
-        user: null
+        user: null,
+        authIsReady: false
     })
+
+    // fires when component mounts - tells us whenever there is a change in authentication status
+    // When there is a change it fires the onAuthState... func.
+    // Fires the func once when we first communicate with firebase.
+    // And then also every time there is a change in the user authentication.
+    // ONly need to do it once to find out who the initial user is.
+    // we save it in unsub - because the firebase function returns an unsubscribe function.
+    // when the func is invoked it carries on to unsub() which unsubscribes from it.
+    useEffect(() => {
+        const unsub = projectAuth.onAuthStateChanged((user) => {
+            dispatch({ type: 'AUTH_IS_READY', payload: user })
+            unsub()
+        })
+    }, [])
 
     console.log('AuthContext state:', state)
 
