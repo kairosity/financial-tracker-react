@@ -7,8 +7,6 @@ import Login from './pages/login/Login'
 import Signup from './pages/signup/Signup'
 import Navbar from './components/Navbar'
 
-
-
 function App() {
 
   const { authIsReady, user } = useAuthContext()
