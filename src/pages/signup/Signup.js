@@ -15,10 +15,6 @@ export default function Signup() {
 
         // signup function from useSignup
         signup(email, password, displayName)
-
-        setDisplayName('')
-        setEmail('')
-        setPassword('')
     }
 
     return (

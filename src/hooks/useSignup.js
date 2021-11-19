@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react'
 import { projectAuth } from '../firebase/config'
 import { useAuthContext } from './useAuthContext'
 
+/* 
+A hook function to sign users up.
+*/
 export const useSignup = () => {
 
     const [error, setError] = useState(null)
@@ -9,6 +12,7 @@ export const useSignup = () => {
     const { dispatch } = useAuthContext()
     const [isCancelled, setIsCancelled] = useState(false)
 
+    // When a user fills out signup form & hits submit, this function will run.
     const signup = async (email, password, displayName) => {
         setError(null)
         setIsPending(true)
@@ -18,12 +22,12 @@ export const useSignup = () => {
             // this createuserwith... signup function automatically logs the user in.
             const response = await projectAuth.createUserWithEmailAndPassword(email, password)
             
-
+            // if there is a network error throw an error & the catch block will continue.
             if (!response) {
                 throw new Error('Could not complete signup')
             }
 
-            // Add display name to user
+            // Add display name to user object
             await response.user.updateProfile({ displayName: displayName })
 
             // dispatch login action - this stores the user object & details in the context on the front-end  
@@ -43,6 +47,8 @@ export const useSignup = () => {
             }
         }
     }
+    // If the component unmounts, it immediately runs this cleanup func. isCancelled is set to true 
+    // Thus any state after the if(!isCan...) blocks do not run. So state is not changed after unmounting thus no error.
     useEffect(() => {
         return () => setIsCancelled(true)
     }, [])
