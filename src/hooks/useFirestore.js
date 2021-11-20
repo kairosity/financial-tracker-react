@@ -16,6 +16,8 @@ const firestoreReducer = (state, action) => {
             return { isPending: true, document: null, success: false, error: null }
         case 'ADDED_DOCUMENT':
             return { isPending: false, document: action.payload, success: true, error: null }
+        case 'DELETED_DOCUMENT':
+            return { isPending: false, document: null, success: true, error: null }
         case 'ERROR':
             return { isPending: false, document: null, success: false, error: action.payload }
         default:
@@ -46,17 +48,23 @@ export const useFirestore = (collection) => {
         try {
             const createdAt = timestamp.fromDate(new Date())
             const addedDocument = await collectionReference.add({...doc, createdAt: createdAt})
-            console.log(...doc)
+
             dispatchIfNotCancelled({ type: 'ADDED_DOCUMENT', payload: addedDocument })
 
-            } catch(err){
+        } catch(err){
             dispatchIfNotCancelled({ type: 'ERROR', payload: err.message })
         }
     }
 
     // delete a document
     const deleteDocument = async (id) => {
-
+        dispatch({ type: 'IS_PENDING' })
+        try {
+            await collectionReference.doc(id).delete()
+            dispatchIfNotCancelled({ type: 'DELETED_DOCUMENT' })
+        } catch(err){
+            dispatchIfNotCancelled({ type: 'ERROR', payload: 'could not delete' })
+        }
     }
 
     // if the component ever unmounts setIsCancelled will be set to true. So it won't try to update state
